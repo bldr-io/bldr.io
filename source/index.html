@@ -1,33 +1,133 @@
 ---
 layout: default
-title: Home
-generator: pagination
-pagination:
-    max_per_page: 3
-use:
-    - posts
+full_title: Bldr Task Runner
 ---
-{% for post in page.pagination.items %}
-    <article>
-        <header>
-            <h2><a href="{{ site.url }}{{ post.url }}">{{ post.title }}</a></h2>
-        </header>
-        <div>
-            {{ post.blocks.content|raw }}
+
+<div class="row">
+    <div class="span12">
+        <h2><img src="images/bldr.io.png" alt="bldr"/></h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12 center">
+        <h2>The <em>PHP Task Runner</em> you've been waiting for!</h2>
+    </div>
+</div>
+
+<!-- features -->
+<div class="row">
+    <div class="feature-section">
+        <div class="feature-item">
+            <h4>Why Another Task Runner</h4>
+
+            <div class="feature-detail">
+                <p>
+                    There are plenty of tasks runners out there right now, but <strong>Bldr</strong> hopes to reduce
+                    the number of dependencies required to get running with a task runner. Assuming you
+                    are already working with PHP, <strong>Bldr</strong> doesnt have any new dependencies,
+                    besides the third party extensions. You don't need to install <strong>npm</strong>,
+                    or even <strong>Java</strong>.
+                </p>
+            </div>
+            <!-- /feature-detail -->
         </div>
-        {% if post.meta.tags %}
-            <p class="tags">
-            Tags:
-            {% for tag in post.meta.tags %}
-            <a href="{{ site.url }}/blog/tags/{{ tag|url_encode(true) }}">{{ tag }}</a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
-            </p>
-        {% endif %}
-    </article>
-{% endfor %}
-{% if page.pagination.previous_page or page.pagination.next_page %}
-    <nav>
-        {% if page.pagination.previous_page %}<a href="{{ site.url }}{{ page.pagination.previous_page.url }}">Newer Posts</a>{% endif %}<br />
-        {% if page.pagination.next_page %}<a href="{{ site.url }}{{ page.pagination.next_page.url }}">Older Posts</a>{% endif %}<br />
-    </nav>
-{% endif %}
+        <!-- /feature-item -->
+
+        <div class="feature-item">
+            <h4>The Big Goal</h4>
+
+            <div class="feature-detail">
+                <p>
+                    The big goal of this task runner is to encourage extensibility. <strong>Bldr</strong> aims to make
+                    it very simple to create new functionality by using the
+                    <strong>
+                        <a href="http://symfony.com/doc/current/components/dependency_injection/index.html">
+                            Dependency Injection Component
+                        </a>
+                    </strong> from Sensio's <strong><a href="http://symfony.com">Symfony2 Framework</a></strong>.
+                    If you want to take a look at how to make a new extension, check out the
+                    <a href="http://docs.bldr.io/en/latest/">documentation</a>, on <a href="http://readthedocs.org">Read The Docs</a>.
+                </p>
+            </div>
+            <!-- /feature-detail -->
+        </div>
+        <!-- /feature-item -->
+
+        <div class="feature-item">
+            <h4>Issues & Contributing</h4>
+
+            <div class="feature-detail">
+                <p>
+                    Having troubles with <strong>Bldr</strong>? Post an issue in github, or message me on IRC
+                    (Try <strong>#sdphp</strong> on <strong>Freenode</strong>).
+                    I'm also availble by email at <a href="mailto:aequasi@gmail.com">aequasi@gmail.com</a>.
+                    If you'd like to help contribute, just create a pull request on Github! If you've made an extension
+                    that you think should be in the core, feel free to send me a message, or post an issue.
+                </p>
+            </div>
+            <!-- /feature-detail -->
+        </div>
+        <!-- /feature-item -->
+    </div>
+    <!-- /feature-section -->
+</div>
+<!-- /row -->
+
+<div class="separator"></div>
+
+<div class="row">
+    <div class="box drop-shadow" id="installation">
+        <h3>Installation</h3>
+        <p>This should be installed via composer, for now. You can either install it globally, or in your own project.
+           If it is the first time you globally install a dependency then make sure you include <tt class="docutils literal"><span class="pre">~/.composer/vendor/bin</span></tt>
+           in <tt class="docutils literal"><span class="pre">$PATH</span></tt> as shown <a class="reference external" href="http://getcomposer.org/doc/03-cli.md#global">here</a>.</p>
+        <p><strong>Global Setup</strong></p>
+        <div class="highlight-shell">
+                            <pre>$ composer global require bldr-io/bldr "~2.0.0"
+
+# Or
+
+$ curl -sS http://bldr.io/installer | php
+$ mv bldr.phar /usr/bin/bldr</pre>
+        </div>
+        <p><strong>Project Setup</strong></p>
+        <div class="highlight-shell">
+            <pre>$ composer require bldr-io/bldr "~2.0.0"</pre>
+        </div>
+        <p>And that&#8217;s it! From here, you should be able to run <tt class="docutils literal"><span class="pre">bldr</span></tt> if you set it up globally, or <tt class="docutils literal"><span class="pre">./bin/bldr</span></tt> if you set
+           it up in your project.</p>
+    </div> <!-- /box drop-shadow -->
+</div>
+<!-- /row -->
+
+<div class="row spacer"></div>
+
+<div class="row">
+    <div class="box drop-shadow" id="sample-config">
+        <h3>Sample Config</h3>
+        <p>
+            Configuration can be in almost any format (Yaml, Json, Xml, Ini, or PHP) but the default is Yaml. Heres a simple
+            configuration file.
+        </p>
+                    <pre>bldr:
+    name: acme/demo-project
+    description: Description for your project
+    profiles:
+        default:
+            description: Sample Profile
+            tasks:
+                - sampleTask
+    tasks:
+        sampleTask:
+            description: Runs a sleep for 5 seconds, then sends a message to the screen
+            calls:
+                -
+                    type: sleep
+                    seconds: 5
+                -
+                    type: notify
+                    message: Finished Sleeping. Ending now.</pre>
+    </div> <!-- /box drop-shadow -->
+</div>
+<!-- /row -->
