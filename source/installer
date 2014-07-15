@@ -340,29 +340,9 @@ function installBldr($version, $installDir, $quiet)
 
         $source = "https://raw.githubusercontent.com/bldr-io/bldr-phar/{$version}/bldr.phar";
 
+        `wget -O {$file} {$source}`;
+
         $errorHandler = new ErrorHandler();
-        set_error_handler(array($errorHandler, 'handleError'));
-
-        $fh = fopen($file, 'w');
-        if (!$fh) {
-            out('Could not create file '.$file.': '.$errorHandler->message, 'error');
-        }
-
-        $options = [
-            'ssl' => [
-                'CN_match' => 'www.github.com',
-                'verify_peer' => false
-            ]
-        ];
-        if (!fwrite($fh, file_get_contents($source, null, stream_context_create($options)))) {
-            out('Download failed: '.$errorHandler->message, 'error');
-        }
-        fclose($fh);
-
-        restore_error_handler();
-        if ($errorHandler->message) {
-            continue;
-        }
 
         try {
             // test the phar validity
