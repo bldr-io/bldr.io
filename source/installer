@@ -338,7 +338,7 @@ function installBldr($version, $installDir, $quiet)
             out("Downloading...", 'info');
         }
 
-        $source = "https://github.com/bldr-io/bldr-phar/raw/{$version}/bldr.phar";
+        $source = "http://raw.githubusercontent.com/bldr-io/bldr-phar/{$version}/bldr.phar";
 
         $errorHandler = new ErrorHandler();
         set_error_handler(array($errorHandler, 'handleError'));
