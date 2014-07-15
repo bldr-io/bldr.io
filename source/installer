@@ -347,7 +347,14 @@ function installBldr($version, $installDir, $quiet)
         if (!$fh) {
             out('Could not create file '.$file.': '.$errorHandler->message, 'error');
         }
-        if (!fwrite($fh, file_get_contents($source, null, stream_context_create(['ssl' => ['verify_peer' => false]])))) {
+
+        $options = [
+            'ssl' => [
+                'CN_match' => 'www.github.com',
+                'verify_peer' => false
+            ]
+        ];
+        if (!fwrite($fh, file_get_contents($source, null, stream_context_create($options)))) {
             out('Download failed: '.$errorHandler->message, 'error');
         }
         fclose($fh);
