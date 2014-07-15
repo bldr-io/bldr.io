@@ -4,7 +4,7 @@
 /**
  * This file is part of Bldr.
  *
- * (c) Luis Cordova <cordoval@gmail.com>
+ * (c) Aaron Scherer <aequasi@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -24,6 +24,7 @@ function process($argv)
     $help       = in_array('--help', $argv);
     $force      = in_array('--force', $argv);
     $quiet      = in_array('--quiet', $argv);
+    $version    = '@stable';
     $installDir = false;
 
     // --no-ansi wins over --ansi
@@ -42,11 +43,20 @@ function process($argv)
     }
 
     foreach ($argv as $key => $val) {
+
         if (0 === strpos($val, '--install-dir')) {
             if (13 === strlen($val) && isset($argv[$key+1])) {
                 $installDir = trim($argv[$key+1]);
             } else {
                 $installDir = trim(substr($val, 14));
+            }
+        }
+
+        if (0 === strpos($val, '--version')) {
+            if (9 === strlen($val) && isset($argv[$key+1])) {
+                $version = trim($argv[$key+1]);
+            } else {
+                $version = trim(substr($val, 10));
             }
         }
     }
@@ -68,7 +78,7 @@ function process($argv)
     }
 
     if ($ok || $force) {
-        installBldr($installDir, $quiet);
+        installBldr($version, $installDir, $quiet);
         exit(0);
     }
 
@@ -90,6 +100,7 @@ Options
 --ansi               force ANSI color output
 --no-ansi            disable ANSI color output
 --install-dir="..."  accepts a target installation directory
+--version="@stable"  accepts a tag name, @stable, or @dev
 
 EOF;
 }
@@ -311,7 +322,7 @@ function checkPlatform($quiet)
 /**
  * installs bldr to the current working directory
  */
-function installBldr($installDir, $quiet)
+function installBldr($version, $installDir, $quiet)
 {
     $installPath = (is_dir($installDir) ? rtrim($installDir, '/').'/' : '') . 'bldr.phar';
     $installDir = realpath($installDir) ? realpath($installDir) : getcwd();
@@ -327,7 +338,7 @@ function installBldr($installDir, $quiet)
             out("Downloading...", 'info');
         }
 
-        $source = 'http://bldr.io/bldr.phar';
+        $source = "https://github.com/bldr-io/bldr-phar/raw/{$version}/bldr.phar";
 
         $errorHandler = new ErrorHandler();
         set_error_handler(array($errorHandler, 'handleError'));
