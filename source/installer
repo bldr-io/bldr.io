@@ -24,7 +24,7 @@ function process($argv)
     $help       = in_array('--help', $argv);
     $force      = in_array('--force', $argv);
     $quiet      = in_array('--quiet', $argv);
-    $version    = '@stable';
+    $version    = 'stable';
     $installDir = false;
 
     // --no-ansi wins over --ansi
