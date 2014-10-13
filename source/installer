@@ -338,11 +338,24 @@ function installBldr($version, $installDir, $quiet)
             out("Downloading...", 'info');
         }
 
-        $source = "https://raw.githubusercontent.com/bldr-io/bldr-phar/{$version}/bldr.phar";
-
-        `wget -O {$file} {$source}`;
+        $source = "http ://bldr.io/bldr-phar/{$version}/bldr.phar";
 
         $errorHandler = new ErrorHandler();
+        set_error_handler(array($errorHandler, 'handleError'));
+
+        $fh = fopen($file, 'w');
+        if (!$fh) {
+            out('Could not create file '.$file.': '.$errorHandler->message, 'error');
+        }
+        if (!fwrite($fh, file_get_contents($source, false, getStreamContext($source)))) {
+            out('Download failed: '.$errorHandler->message, 'error');
+        }
+        fclose($fh);
+
+        restore_error_handler();
+        if ($errorHandler->message) {
+            continue;
+        }
 
         try {
             // test the phar validity
@@ -378,6 +391,78 @@ function installBldr($version, $installDir, $quiet)
         out(PHP_EOL."Use it: php $installPath", 'info');
         out(PHP_EOL.`php $installPath --version`);
     }
+}
+
+/**
+ * function copied from Composer\Util\StreamContextFactory::getContext
+ *
+ * Any changes should be applied there as well, or backported here.
+ *
+ * @param string $url URL the context is to be used for
+ * @return resource Default context
+ * @throws \RuntimeException if https proxy required and OpenSSL uninstalled
+ */
+function getStreamContext($url)
+{
+    $options = array('http' => array());
+
+    // Handle system proxy
+    if (!empty($_SERVER['HTTP_PROXY']) || !empty($_SERVER['http_proxy'])) {
+        // Some systems seem to rely on a lowercased version instead...
+        $proxy = parse_url(!empty($_SERVER['http_proxy']) ? $_SERVER['http_proxy'] : $_SERVER['HTTP_PROXY']);
+    }
+
+    if (!empty($proxy)) {
+        $proxyURL = isset($proxy['scheme']) ? $proxy['scheme'] . '://' : '';
+        $proxyURL .= isset($proxy['host']) ? $proxy['host'] : '';
+
+        if (isset($proxy['port'])) {
+            $proxyURL .= ":" . $proxy['port'];
+        } elseif ('http://' == substr($proxyURL, 0, 7)) {
+            $proxyURL .= ":80";
+        } elseif ('https://' == substr($proxyURL, 0, 8)) {
+            $proxyURL .= ":443";
+        }
+
+        // http(s):// is not supported in proxy
+        $proxyURL = str_replace(array('http://', 'https://'), array('tcp://', 'ssl://'), $proxyURL);
+
+        if (0 === strpos($proxyURL, 'ssl:') && !extension_loaded('openssl')) {
+            throw new \RuntimeException('You must enable the openssl extension to use a proxy over https');
+        }
+
+        $options['http'] = array(
+            'proxy'           => $proxyURL,
+        );
+
+        // enabled request_fulluri unless it is explicitly disabled
+        switch (parse_url($url, PHP_URL_SCHEME)) {
+            case 'http': // default request_fulluri to true
+                $reqFullUriEnv = getenv('HTTP_PROXY_REQUEST_FULLURI');
+                if ($reqFullUriEnv === false || $reqFullUriEnv === '' || (strtolower($reqFullUriEnv) !== 'false' && (bool) $reqFullUriEnv)) {
+                    $options['http']['request_fulluri'] = true;
+                }
+                break;
+            case 'https': // default request_fulluri to true
+                $reqFullUriEnv = getenv('HTTPS_PROXY_REQUEST_FULLURI');
+                if ($reqFullUriEnv === false || $reqFullUriEnv === '' || (strtolower($reqFullUriEnv) !== 'false' && (bool) $reqFullUriEnv)) {
+                    $options['http']['request_fulluri'] = true;
+                }
+                break;
+        }
+
+        if (isset($proxy['user'])) {
+            $auth = urldecode($proxy['user']);
+            if (isset($proxy['pass'])) {
+                $auth .= ':' . urldecode($proxy['pass']);
+            }
+            $auth = base64_encode($auth);
+
+            $options['http']['header'] = "Proxy-Authorization: Basic {$auth}\r\n";
+        }
+    }
+
+    return stream_context_create($options);
 }
 
 /**
